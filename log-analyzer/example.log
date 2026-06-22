@@ -1,0 +1,7 @@
+2026-06-19 09:00:01 INFO Application started
+2026-06-19 09:01:12 WARNING Request took longer than expected
+2026-06-19 09:02:30 ERROR Database connection failed
+2026-06-19 09:03:05 ERROR Database connection failed
+2026-06-20 10:15:00 INFO Background job started
+2026-06-20 10:15:03 CRITICAL Disk is full
+This line intentionally has no recognized log level.

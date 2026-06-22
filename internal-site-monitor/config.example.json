@@ -1,0 +1,27 @@
+{
+  "failure_threshold": 3,
+  "check_interval_seconds": 15,
+  "history_retention_days": 7,
+  "sites": [
+    {
+      "name": "Example",
+      "url": "https://example.com",
+      "expected_status": 200,
+      "timeout_seconds": 5,
+      "slow_after_ms": 1000
+    }
+  ],
+  "notifications": {
+    "slack_webhook_env": "SLACK_WEBHOOK_URL",
+    "email": {
+      "enabled": false,
+      "host_env": "SMTP_HOST",
+      "port": 587,
+      "starttls": true,
+      "username_env": "SMTP_USERNAME",
+      "password_env": "SMTP_PASSWORD",
+      "from": "site-monitor@example.com",
+      "to": ["operations@example.com"]
+    }
+  }
+}

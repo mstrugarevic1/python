@@ -1,0 +1,4 @@
+config.json
+data/
+web/
+__pycache__/
