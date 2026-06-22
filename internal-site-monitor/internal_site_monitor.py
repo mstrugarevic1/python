@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import argparse
-import html
 import json
 import os
+import shutil
 import smtplib
 import threading
 import time
@@ -21,11 +21,9 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 WEB_DIR = ROOT / "web"
+FRONTEND_DIR = ROOT / "frontend"
 STATE_FILE = DATA_DIR / "state.json"
 HISTORY_FILE = DATA_DIR / "history.json"
-STATUS_ICONS = {"UP": "🟢", "SLOW": "🐇", "DOWN": "🔴"}
-
-
 def load_json(path: Path, default: object) -> object:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -108,59 +106,13 @@ def notify(config: dict, subject: str, body: str) -> bool:
 
 def write_dashboard(results: list[dict], history: dict) -> None:
     WEB_DIR.mkdir(exist_ok=True)
-    cards = []
-    for index, item in enumerate(results):
-        result = item["result"]
-        cards.append(f"""<section class="site {result['status'].lower()}">
-<h2>{html.escape(item['name'])} <span class="status">{STATUS_ICONS[result['status']]} {result['status']}</span></h2>
-<p><a href="{html.escape(item['url'])}">{html.escape(item['url'])}</a></p>
-<p>HTTP {result['status_code'] or '—'} · {result['response_ms']} ms · {html.escape(result['checked_at'])}</p>
-<div class="chart"><canvas id="chart-{index}"></canvas></div></section>""")
-    chart_data = json.dumps([history[item["name"]] for item in results]).replace("</", "<\\/")
-    page = """<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="60">
-<title>Internal Site Monitor</title><style>
-body{font:16px system-ui;max-width:900px;margin:40px auto;padding:0 16px;background:#f4f6f8;color:#18212f}
-section{background:white;padding:16px;margin:16px 0;border-left:6px solid #16a34a;border-radius:6px}section.slow{border-color:#f59e0b}section.down{border-color:#dc2626}
-h2{display:flex;justify-content:space-between}.status{font-size:14px}.chart{height:220px}a{color:#2563eb}.controls{display:flex;gap:16px;flex-wrap:wrap;align-items:center}input,select{font:inherit;padding:6px 8px;border:1px solid #94a3b8;border-radius:4px}</style>
-<h1>Internal Site Monitor</h1>
-<div class="controls"><label>Search <input id="search" type="search" placeholder="Name or URL"></label>
-<label>Show metrics for <select id="range"><option value="300000">5 minutes</option><option value="900000">15 minutes</option><option value="1800000">30 minutes</option><option value="3600000">1 hour</option><option value="21600000">6 hours</option><option value="43200000">12 hours</option><option value="86400000">1 day</option><option value="259200000">3 days</option><option value="604800000">7 days</option><option value="0">All retained data</option></select></label></div>""" + "".join(cards) + f"""
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const history = {chart_data};
-const charts = [];
-for (const [index, samples] of history.entries()) {{
-  const canvas = document.getElementById(`chart-${{index}}`);
-  if (!canvas) continue;
-  charts.push(new Chart(canvas, {{
-    type: 'line',
-    data: {{
-      labels: [],
-      datasets: [{{label: 'Response time (ms)', data: [], borderColor: '#334155',
-        borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0}}]
-    }},
-    options: {{responsive: true, maintainAspectRatio: false, scales: {{
-      x: {{grid: {{color: '#e2e8f0'}}, ticks: {{maxTicksLimit: 8}}}},
-      y: {{beginAtZero: true, grid: {{color: '#e2e8f0'}}, title: {{display: true, text: 'ms'}}}}
-    }}}}
-  }}));
-}}
-document.getElementById('range').addEventListener('change', event => {{
-  const cutoff = Number(event.target.value) ? Date.now() - Number(event.target.value) : 0;
-  history.forEach((samples, index) => {{
-    const visible = samples.filter(sample => new Date(sample.checked_at).getTime() >= cutoff);
-    charts[index].data.labels = visible.map(sample => new Date(sample.checked_at).toLocaleTimeString());
-    charts[index].data.datasets[0].data = visible.map(sample => sample.response_ms);
-    charts[index].update();
-  }});
-}});
-document.getElementById('range').dispatchEvent(new Event('change'));
-document.getElementById('search').addEventListener('input', event => {{
-  const query = event.target.value.toLowerCase();
-  document.querySelectorAll('.site').forEach(site => site.hidden = !site.textContent.toLowerCase().includes(query));
-}});
-</script>"""
+    dashboard_data = [item | {"history": history[item["name"]]} for item in results]
+    data = json.dumps(dashboard_data).replace("</", "<\\/")
+    template = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+    page = template.replace("__DASHBOARD_DATA__", data)
     (WEB_DIR / "index.html").write_text(page, encoding="utf-8")
+    for asset in ("styles.css", "dashboard.js"):
+        shutil.copyfile(FRONTEND_DIR / asset, WEB_DIR / asset)
 
 
 def run_checks(config_path: Path) -> None:

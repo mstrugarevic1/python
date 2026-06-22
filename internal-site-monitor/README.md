@@ -42,6 +42,10 @@ Site names must be unique because they identify persisted state and history.
 Generated runtime files live in `data/` and `web/`. Do not commit `config.json`
 if it contains internal URLs, and never put webhook URLs or passwords in it.
 
+Dashboard source files live in `frontend/`. Edit `index.html` for structure,
+`styles.css` for appearance, and `dashboard.js` for chart behavior. The monitor
+copies them into the generated `web/` directory automatically.
+
 Topics demonstrated: HTTP requests, timing, JSON configuration, persisted
 state, failure thresholds, Slack webhooks, SMTP, Chart.js, HTML generation, and
 a small local HTTP server.

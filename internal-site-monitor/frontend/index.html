@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Internal Site Monitor</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main>
+      <h1>Internal Site Monitor</h1>
+
+      <div class="controls">
+        <label>
+          Search
+          <input id="search" type="search" placeholder="Name or URL">
+        </label>
+
+        <label>
+          Show metrics for
+          <select id="range">
+            <option value="300000">5 minutes</option>
+            <option value="900000">15 minutes</option>
+            <option value="1800000">30 minutes</option>
+            <option value="3600000">1 hour</option>
+            <option value="21600000">6 hours</option>
+            <option value="43200000">12 hours</option>
+            <option value="86400000">1 day</option>
+            <option value="259200000">3 days</option>
+            <option value="604800000">7 days</option>
+            <option value="0">All retained data</option>
+          </select>
+        </label>
+
+        <label>
+          <input id="auto-refresh" type="checkbox">
+          Auto-refresh
+        </label>
+      </div>
+
+      <div id="sites"></div>
+    </main>
+
+    <template id="site-template">
+      <section class="site">
+        <h2><span class="site-name"></span><span class="status"></span></h2>
+        <p><a class="site-url"></a></p>
+        <p class="site-details"></p>
+        <div class="chart"><canvas></canvas></div>
+      </section>
+    </template>
+
+    <script id="dashboard-data" type="application/json">__DASHBOARD_DATA__</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

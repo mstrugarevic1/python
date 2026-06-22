@@ -1,0 +1,67 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #18212f;
+  background: #f4f6f8;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+input,
+select {
+  padding: 6px 8px;
+  font: inherit;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+}
+
+input[type="checkbox"] {
+  padding: 0;
+}
+
+.site {
+  margin: 16px 0;
+  padding: 16px;
+  background: white;
+  border-left: 6px solid #16a34a;
+  border-radius: 6px;
+}
+
+.site.slow {
+  border-color: #f59e0b;
+}
+
+.site.down {
+  border-color: #dc2626;
+}
+
+h2 {
+  display: flex;
+  justify-content: space-between;
+}
+
+.status {
+  font-size: 14px;
+}
+
+.chart {
+  height: 220px;
+}
+
+a {
+  color: #2563eb;
+}
