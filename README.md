@@ -3,8 +3,6 @@
 Small, practical Python tools for automation, operations, and learning. Each
 project is deliberately limited in scope and has its own README with examples.
 
-Repository: [mstrugarevic1/python](https://github.com/mstrugarevic1/python)
-
 | Project | Purpose | Main concepts |
 | --- | --- | --- |
 | [log-analyzer](log-analyzer/) | Summarize application logs | parsing, counters, CSV, CLI arguments |
