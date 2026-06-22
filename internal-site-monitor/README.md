@@ -4,6 +4,8 @@ A small internal availability monitor. It checks configured URLs, tracks
 consecutive failures, stores recent response times, builds a Chart.js dashboard,
 and optionally sends Slack or email state-change alerts.
 
+![Internal Site Monitor dashboard](docs/dashboard.png)
+
 ## Setup
 
 Python dependencies are not required. Copy and edit the example configuration:
