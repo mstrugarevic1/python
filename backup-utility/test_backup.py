@@ -1,30 +1,53 @@
+import os
+import stat
+import subprocess
+import sys
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
-
-from backup import copy_stable
 
 
-class CopyStableTest(unittest.TestCase):
-    def test_retries_a_changed_file(self) -> None:
+SCRIPT = Path(__file__).with_name("backup.py")
+
+
+class BackupTest(unittest.TestCase):
+    def test_set_backup_and_restore_preserve_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            source, target = Path(directory) / "source", Path(directory) / "target"
-            source.write_text("first")
-            real_copy = __import__("shutil").copy2
-            calls = 0
+            root = Path(directory)
+            source, archives, restored = root / "source", root / "archives", root / "restored"
+            source.mkdir()
+            file = source / "private.txt"
+            file.write_text("secret")
+            file.chmod(0o640)
+            (source / "ignored.log").write_text("ignore")
+            (source / "link").symlink_to("private.txt")
+            env = {**os.environ, "BACKUP_UTILITY_CONFIG": str(root / "sets.json")}
 
-            def changing_copy(src: Path, dst: Path) -> None:
-                nonlocal calls
-                real_copy(src, dst)
-                calls += 1
-                if calls == 1:
-                    src.write_text("second version")
+            subprocess.run([sys.executable, SCRIPT, "set", "server", source, archives,
+                            "--exclude", "*.log"], check=True, env=env)
+            subprocess.run([sys.executable, SCRIPT, "backup", "server"], check=True, env=env)
+            archive = next(archives.glob("*.tar.gz"))
+            subprocess.run([sys.executable, SCRIPT, "restore", archive, restored], check=True, env=env)
 
-            with patch("backup.shutil.copy2", changing_copy):
-                copy_stable(source, target)
+            self.assertEqual((restored / "private.txt").read_text(), "secret")
+            self.assertEqual(stat.S_IMODE((restored / "private.txt").stat().st_mode), 0o640)
+            self.assertTrue((restored / "link").is_symlink())
+            self.assertFalse((restored / "ignored.log").exists())
 
-            self.assertEqual((calls, target.read_text()), (2, "second version"))
+    def test_restore_rejects_nonempty_destination(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "backup.tar.gz"
+            with tarfile.open(archive, "w:gz"):
+                pass
+            destination = root / "restore"
+            destination.mkdir()
+            (destination / "keep").touch()
+            result = subprocess.run([sys.executable, SCRIPT, "restore", archive, destination],
+                                    text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("not empty", result.stderr)
 
 
 if __name__ == "__main__":

@@ -1,35 +1,35 @@
 # Backup Utility
 
-Creates a timestamped copy of a directory while preserving file metadata.
-`.git` and `__pycache__` directories are always skipped; additional file
-extensions can be excluded. Empty directories are preserved, while symbolic
-links are skipped so a backup cannot copy data from outside the source tree.
-
-Preview a backup first:
+Creates and restores named, timestamped `tar.gz` backups while preserving file
+permissions, ownership IDs, timestamps, symbolic links, hard links, ACLs, and
+extended attributes supported by the installed `tar`.
 
 ```bash
-python3 backup.py ~/Documents ~/Backups --dry-run
+# Save a named backup set.
+python3 backup.py set web /srv/web /var/backups/web \
+  --exclude '*.log' --exclude '.git'
+
+# Inspect sets, preview, then back up.
+python3 backup.py list
+python3 backup.py list web
+python3 backup.py backup web --dry-run
+sudo python3 backup.py backup web
+
+# Restore into a new or empty directory.
+sudo python3 backup.py restore /var/backups/web/web-20260623-143000-123456.tar.gz /srv/restore-test
 ```
 
-Run it and exclude temporary and log files:
+Set definitions live in `~/.config/backup-utility/sets.json`. Set
+`BACKUP_UTILITY_CONFIG` to use another path, which is useful for a service
+account.
 
-```bash
-python3 backup.py ~/Documents ~/Backups --exclude .tmp --exclude .log
-```
+Normal output contains only start, completion, size, duration, and errors. Use
+`--verbose` on `backup` or `restore` for per-file tar output. A failed backup is
+retained with a `.incomplete` suffix and is never presented as complete.
 
-The script refuses to place the destination inside the source because that can
-cause backups to copy themselves recursively.
+GNU tar receives explicit ACL, xattr, SELinux, sparse-file, numeric-owner, and
+restore flags. BSD tar uses its native pax metadata support and `-p` restore.
+Run as root when ownership and system metadata must be captured or restored.
 
-Each file's size and nanosecond modification time are checked before and after
-copying. A file that changes is copied once more; if it changes again, the
-backup fails and keeps its `.incomplete` suffix. This catches most concurrent
-writes, but it is not a consistent snapshot of the whole directory. Pause the
-writer or use filesystem snapshots or an application's native backup command
-when cross-file consistency is required.
-
-## How it works
-
-![Backup process](backup.png)
-
-Topics demonstrated: `pathlib`, recursive traversal, argument parsing,
-timestamps, safety validation, best-effort change detection, and `shutil.copy2`.
+This is not a consistent snapshot of live application data. Use database-native
+dumps or filesystem snapshots when files must represent one point in time.
