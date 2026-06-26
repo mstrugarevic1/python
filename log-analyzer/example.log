@@ -1,7 +1,7 @@
-2026-06-19 09:00:01 INFO Application started
-2026-06-19 09:01:12 WARNING Request took longer than expected
-2026-06-19 09:02:30 ERROR Database connection failed
-2026-06-19 09:03:05 ERROR Database connection failed
-2026-06-20 10:15:00 INFO Background job started
-2026-06-20 10:15:03 CRITICAL Disk is full
-This line intentionally has no recognized log level.
+192.0.2.10 - - [26/Jun/2026:12:00:00 +0200] "GET / HTTP/1.1" 200 512 "-" "Mozilla/5.0"
+192.0.2.10 - - [26/Jun/2026:12:00:03 +0200] "GET /assets/app.css HTTP/1.1" 200 2048 "https://example.test/" "Mozilla/5.0"
+198.51.100.4 - - [26/Jun/2026:12:00:06 +0200] "POST /login HTTP/1.1" 302 128 "https://example.test/login" "Mozilla/5.0"
+203.0.113.8 - - [26/Jun/2026:12:01:10 +0200] "GET /missing HTTP/1.1" 404 64 "-" "curl/8.0"
+203.0.113.8 - - [26/Jun/2026:12:01:11 +0200] "GET /missing HTTP/1.1" 404 64 "-" "curl/8.0"
+198.51.100.4 - - [26/Jun/2026:12:02:00 +0200] "GET /api/status HTTP/1.1" 500 256 "-" "curl/8.0"
+This line intentionally is not an access log.
