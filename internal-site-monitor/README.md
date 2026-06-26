@@ -22,8 +22,8 @@ While running, `serve` checks immediately and repeats every
 
 History is retained for `history_retention_days` (seven days by default).
 Chart.js is loaded from jsDelivr when the dashboard opens, so the browser needs
-internet access. For an isolated internal network, download Chart.js into
-`web/` and change the generated script URL to the local file.
+internet access. For an isolated internal network, download Chart.js and update
+the script URL in `frontend/index.html`; generated `web/` files are overwritten.
 
 ## Alerts
 

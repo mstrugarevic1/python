@@ -20,7 +20,7 @@ The tool does not push branches, create pull requests, delete anything, or run d
 
 You need:
 
-- Python 3
+- Python 3.10 or newer
 - Git
 - Jira Cloud account
 - Jira API token
